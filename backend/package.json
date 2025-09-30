@@ -6,6 +6,23 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+
+    "//": "──────── Docker: baze de date per serviciu ────────",
+    "docker:mq:up": "docker compose -f docker/docker-compose.rabbitmq.yml up -d",
+    "docker:mq:down": "docker compose -f docker/docker-compose.rabbitmq.yml down -v",
+    "docker:auth:up": "docker compose -f apps/auth-service/docker-compose.yml up -d",
+    "docker:auth:down": "docker compose -f apps/auth-service/docker-compose.yml down -v",
+    "docker:users:up": "docker compose -f apps/user-service/docker-compose.yml up -d",
+    "docker:users:down": "docker compose -f apps/user-service/docker-compose.yml down -v",
+    "docker:devices:up": "docker compose -f apps/device-service/docker-compose.yml up -d",
+    "docker:devices:down": "docker compose -f apps/device-service/docker-compose.yml down -v",
+
+    "//3": "──────── Start microservicii ────────",
+    "start:auth": "nest start auth-service --watch",
+    "start:users": "nest start user-service --watch",
+    "start:devices": "nest start device-service --watch",
+
+
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
