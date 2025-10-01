@@ -2,14 +2,21 @@ import { BadRequestException, ForbiddenException, Injectable, InternalServerErro
 import { LoginDto, SignupDto } from "./dto";
 import { PrismaService } from "../prisma/prisma.service";
 import * as argon from "argon2"
-import { dmmfToRuntimeDataModel, PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { isEmail } from "class-validator";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable({})
 export class AuthService{
-    constructor(private prisma:PrismaService){}
+    constructor(
+        private prisma:PrismaService,
+        private jwt:JwtService,
+        private config:ConfigService
+    ){}
 
-    async signup(dto:SignupDto){
+    async signup(
+        dto:SignupDto
+    ):Promise<string>{
         try {
             const existingEmail=await this.prisma.authUser.findUnique({
                 where:{email:dto.email}
@@ -50,7 +57,7 @@ export class AuthService{
                 }
             })
 
-            return user;
+            return this.signToken(user.id,user.email);
         } catch (error) {
             if(error instanceof ForbiddenException|| BadRequestException){
                 throw error;
@@ -60,7 +67,9 @@ export class AuthService{
         
     }
 
-    async login(dto:LoginDto){
+    async login(
+        dto:LoginDto
+    ):Promise<string>{
         try {
             const raw=dto.identifier.trim();
             const isEmailId=isEmail(raw);
@@ -85,7 +94,7 @@ export class AuthService{
                 throw new UnauthorizedException("Esti banat!")
             }
 
-            return user;  
+            return this.signToken(user.id,user.email);  
 
         } catch (error) {
             if(error instanceof UnauthorizedException || ForbiddenException){
@@ -96,4 +105,19 @@ export class AuthService{
         }
     }
 
+    async signToken(
+        userId:number,
+        email:string
+    ):Promise<string>{
+        const payload={
+            sub:userId,
+            email
+        }
+
+        const secret=this.config.get("JWT_SECRET");
+        return this.jwt.signAsync(payload,{
+            expiresIn:"15m",
+            secret
+        })
+    }
 }
