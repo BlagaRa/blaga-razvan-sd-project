@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/device-service"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Type {
+  LIGHT
+  SENSOR
+  NETWORK
+  SECURITY
+}
+
+enum Status {
+  ONLINE
+  OFLINE
+}
+
+enum Room {
+  LIVINGROOM
+  BEDROOM
+  BATHROOM
+  KITCHEN
+}
+
+model Device {
+  id             Int    @id @default(autoincrement())
+  userId         Int
+  name           String @unique
+  maxConsumption Int
+
+  room   Room
+  status Status @default(ONLINE)
+  type   Type
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

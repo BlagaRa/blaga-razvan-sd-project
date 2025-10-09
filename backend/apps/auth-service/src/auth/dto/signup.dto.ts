@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Role } from "../../../generated/auth-user";
 import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength } from "class-validator";
 
 export class SignupDto{

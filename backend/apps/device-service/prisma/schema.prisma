@@ -6,6 +6,8 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/device-service"  
+
 }
 
 datasource db {
@@ -34,7 +36,7 @@ enum Room {
 
 model Device{
   id       Int    @id @default(autoincrement())
-  userId   Int @unique
+  userId   Int 
   name     String @unique
   maxConsumption Int 
 

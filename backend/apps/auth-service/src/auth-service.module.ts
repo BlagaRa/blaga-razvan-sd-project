@@ -11,11 +11,13 @@ import { JwtModule } from '@nestjs/jwt';
     AuthModule,
     PrismaModule,
     ConfigModule.forRoot({
-      isGlobal:true
+      isGlobal:true,
+      envFilePath: ['apps/auth-service/.env'],
     }),
-    JwtModule
+    JwtModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],
 })
 export class AuthServiceModule {}
+
