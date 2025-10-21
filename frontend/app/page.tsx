@@ -1,7 +1,6 @@
-export default function Home(){
-  return (
-    <div>
-      Home
-    </div>
-  )
+// app/page.tsx
+import { redirect } from "next/navigation";
+
+export default function Home() {
+  redirect("/profile");
 }

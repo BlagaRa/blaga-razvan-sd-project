@@ -1,0 +1,16 @@
+Dezvoltare Locala
+npm run docker:all:up
+npm run db:all:migrate
+npm run start:all:dev
+
+Build si deploy in productie
+npm run build:all
+npm run deploy:up
+
+
+Update rapid productie
+npm run deploy:restart
+
+
+Pentru a opri tot
+npm run deploy:down

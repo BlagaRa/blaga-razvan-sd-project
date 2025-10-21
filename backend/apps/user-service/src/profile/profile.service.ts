@@ -86,7 +86,9 @@ export class ProfileService {
 
     async getAllProfiles(){
         try {
-            const profiles=await this.prisma.profile.findMany({})
+            const profiles=await this.prisma.profile.findMany({
+                orderBy:{id:'asc'}
+            })
 
             return profiles;
         } catch (error) {

@@ -125,9 +125,12 @@ export class DeviceService {
 
     async getAllDevices(){
         try {
-            const devices=await this.prisma.device.findMany();
-            console.log("merge")
-            return devices ;
+            const devices=await this.prisma.device.findMany(
+                {orderBy:{
+                    id:'asc'
+                }}
+            );
+            return {devices} ;
         } catch (error) {
             throw new InternalServerErrorException("Eroare la server!")
         }
@@ -166,16 +169,22 @@ export class DeviceService {
                 throw new BadRequestException("Device ul nu exista!")
             }
 
-            if(dto.name){
-                const deviceName=await this.prisma.device.findUnique({
-                    where:{userId:device.userId,
-                        name:dto.name
-                    }
-                })
-                if(deviceName){
-                    throw new BadRequestException("Exista deja un device cu acest nume pentru acest utilizator!")
+            if (dto.name && dto.name !== device.name) {
+                const deviceName = await this.prisma.device.findFirst({
+                    where: {
+                    userId: device.userId,
+                    name: dto.name,
+                    NOT: { id: deviceId }, // <--- excludem device-ul actual
+                    },
+                });
+
+                if (deviceName) {
+                    throw new BadRequestException(
+                    "Exista deja un device cu acest nume pentru acest utilizator!"
+                    );
                 }
             }
+
             
 
             await this.prisma.device.update({

@@ -158,6 +158,10 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -183,8 +187,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/device-service\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Type {\n  LIGHT\n  SENSOR\n  NETWORK\n  SECURITY\n}\n\nenum Status {\n  ONLINE\n  OFLINE\n}\n\nenum Room {\n  LIVINGROOM\n  BEDROOM\n  BATHROOM\n  KITCHEN\n}\n\nmodel Device {\n  id             Int    @id @default(autoincrement())\n  userId         Int\n  name           String @unique\n  maxConsumption Int\n\n  room   Room\n  status Status @default(ONLINE)\n  type   Type\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n",
-  "inlineSchemaHash": "636de275e92e0cac341314ff3c14ee686851fd5ce16d7e037029d38334eda488",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"]\n  output        = \"../generated/device-service\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Type {\n  LIGHT\n  SENSOR\n  NETWORK\n  SECURITY\n}\n\nenum Status {\n  ONLINE\n  OFLINE\n}\n\nenum Room {\n  LIVINGROOM\n  BEDROOM\n  BATHROOM\n  KITCHEN\n}\n\nmodel Device {\n  id             Int    @id @default(autoincrement())\n  userId         Int\n  name           String @unique\n  maxConsumption Int\n\n  room   Room\n  status Status @default(ONLINE)\n  type   Type\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n",
+  "inlineSchemaHash": "e00c7e0fdce903b3f4a0ce97fc1555576302eb00268d87729297295a1015b8cf",
   "copyEngine": true
 }
 
@@ -225,6 +229,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "generated/device-service/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-linux-musl-openssl-3.0.x.so.node");
+path.join(process.cwd(), "generated/device-service/libquery_engine-linux-musl-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "generated/device-service/schema.prisma")

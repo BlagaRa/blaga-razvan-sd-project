@@ -10,7 +10,7 @@ export class ProfileController {
 
     constructor(private profileService:ProfileService){}
     
-    @Post('')
+    @Post('create')
     createProfile(
         @Body() dto:CreateProfileDto,
         @CurrentUser() user:{userId:number}

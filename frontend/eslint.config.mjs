@@ -19,6 +19,14 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
     ],
+
+    rules: {
+      // 🚀 dezactivează regula doar aici
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+
+    // 🔥 (opțional, doar dacă vrei să limitezi dezactivarea la anumite foldere)
+    files: ["src/store/**/*.ts", "store/**/*.ts"],
   },
 ];
 

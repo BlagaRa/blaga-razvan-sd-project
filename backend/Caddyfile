@@ -1,0 +1,12 @@
+:80 {
+  handle /auth/* {
+    reverse_proxy auth-service:3001
+  }
+  handle /device/* {
+    reverse_proxy device-service:3002
+  }
+  handle /profile/* {
+    reverse_proxy user-service:3003
+  }
+  reverse_proxy frontend:3000
+}

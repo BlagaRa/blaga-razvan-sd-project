@@ -1,65 +1,80 @@
 {
   "name": "backend",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "//": "──────── Docker: baze de date per serviciu ────────",
-    "docker:mq:up": "docker compose -f docker/docker-compose.rabbitmq.yml up -d",
-    "docker:mq:down": "docker compose -f docker/docker-compose.rabbitmq.yml down -v",
-    "docker:auth:up": "docker compose -f apps/auth-service/docker-compose.yml up -d",
-    "docker:auth:down": "docker compose -f apps/auth-service/docker-compose.yml down -v",
-    "docker:users:up": "docker compose -f apps/user-service/docker-compose.yml up -d",
-    "docker:users:down": "docker compose -f apps/user-service/docker-compose.yml down -v",
-    "docker:devices:up": "docker compose -f apps/device-service/docker-compose.yml up -d",
-    "docker:devices:down": "docker compose -f apps/device-service/docker-compose.yml down -v",
-    "docker:all:up": "npm run docker:auth:up && npm run docker:users:up && npm run docker:devices:up",
+    "//dev": "──────── DEV LOCAL (per serviciu) ────────",
 
-    "//2": "──────── Prisma Migrations (pt. fiecare serviciu) ────────",
-    "db:auth:migrate": "cd apps/auth-service && npx prisma migrate dev && cd ../..",
-    "db:users:migrate": "cd apps/user-service && npx prisma migrate dev && cd ../..",
-    "db:devices:migrate": "cd apps/device-service && npx prisma migrate dev && cd ../..",
+    "dev:auth:db:up": "docker compose -f apps/auth-service/docker-compose.yml up -d",
+    "dev:auth:db:down": "docker compose -f apps/auth-service/docker-compose.yml down -v",
+    "dev:auth:migrate": "cd apps/auth-service && npx prisma migrate dev && cd ../..",
+    "dev:auth:watch": "nest start auth-service --watch",
+    "dev:auth:all": "npm run dev:auth:db:up && npm run dev:auth:migrate && npm run dev:auth:watch",
 
-    "//3": "──────── Start Baze de Date + Migrations ────────",
-    "db:auth:up": "npm run docker:auth:up && (timeout 1 2>NUL || sleep 1) && npm run db:auth:migrate",
-    "db:users:up": "npm run docker:users:up && (timeout 1 2>NUL || sleep 1) && npm run db:users:migrate",
-    "db:devices:up": "npm run docker:devices:up && (timeout 1 2>NUL || sleep 1) && npm run db:devices:migrate",
-    "db:all:up": "npm run db:auth:up && npm run db:users:up && npm run db:devices:up",
+    "dev:user:db:up": "docker compose -f apps/user-service/docker-compose.yml up -d",
+    "dev:user:db:down": "docker compose -f apps/user-service/docker-compose.yml down -v",
+    "dev:user:migrate": "cd apps/user-service && npx prisma migrate dev && cd ../..",
+    "dev:user:watch": "nest start user-service --watch",
+    "dev:user:all": "npm run dev:user:db:up && npm run dev:user:migrate && npm run dev:user:watch",
 
-    "//4": "──────── Start microservicii ────────",
-    "start:auth": "nest start auth-service --watch",
-    "start:users": "nest start user-service --watch",
-    "start:devices": "nest start device-service --watch",
-    "build": "nest build",
-    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/apps/backend/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/backend/test/jest-e2e.json"
+    "dev:device:db:up": "docker compose -f apps/device-service/docker-compose.yml up -d",
+    "dev:device:db:down": "docker compose -f apps/device-service/docker-compose.yml down -v",
+    "dev:device:migrate": "cd apps/device-service && npx prisma migrate dev && cd ../..",
+    "dev:device:watch": "nest start device-service --watch",
+    "dev:device:all": "npm run dev:device:db:up && npm run dev:device:migrate && npm run dev:device:watch",
+
+    "dev:dbs:down:all": "npm run dev:auth:db:down && npm run dev:user:db:down && npm run dev:device:db:down",
+
+    "//build-local": "──────── BUILD LOCAL (toate) ────────",
+    "generate:all": "cd apps/auth-service && npx prisma generate && cd ../user-service && npx prisma generate && cd ../device-service && npx prisma generate",
+    "build:auth": "npx nest build auth-service",
+    "build:user": "npx nest build user-service",
+    "build:device": "npx nest build device-service",
+    "build:all": "npm run build:auth && npm run build:user && npm run build:device",
+
+    "//prod": "──────── PROD (tot în Docker) ────────",
+    "docker:prod:clean": "docker compose -f docker-compose.prod.yml down -v",
+    "docker:prod:build": "docker compose -f docker-compose.prod.yml build --no-cache",
+    "docker:prod:dbs:up": "docker compose -f docker-compose.prod.yml up -d auth-db user-db device-db",
+
+    "prisma:deploy:auth": "docker compose -f docker-compose.prod.yml run --rm auth-service npx prisma migrate deploy --schema=apps/auth-service/prisma/schema.prisma",
+    "prisma:deploy:user": "docker compose -f docker-compose.prod.yml run --rm user-service npx prisma migrate deploy --schema=apps/user-service/prisma/schema.prisma",
+    "prisma:deploy:device": "docker compose -f docker-compose.prod.yml run --rm device-service npx prisma migrate deploy --schema=apps/device-service/prisma/schema.prisma",
+
+    "prisma:deploy:all": "npm run prisma:deploy:auth && npm run prisma:deploy:user && npm run prisma:deploy:device",
+
+    "docker:prod:up:services": "docker compose -f docker-compose.prod.yml up -d auth-service user-service device-service frontend caddy",
+    "docker:prod:up:frontend":"docker compose -f docker-compose.prod.yml up -d frontend",
+
+    "docker:prod:up": "npm run docker:prod:clean && npm run docker:prod:build && npm run docker:prod:dbs:up && node -e \"setTimeout(()=>process.exit(0),5000)\" && npm run prisma:deploy:all && npm run docker:prod:up:services",
+    "docker:prod:down": "docker compose -f docker-compose.prod.yml down -v",
+
+    "//ops": "──────── OPS UTILE ────────",
+    "logs:api": "docker compose -f docker-compose.prod.yml logs -f auth-service user-service device-service",
+    "logs:frontend": "docker compose -f docker-compose.prod.yml logs -f frontend",
+    "ps": "docker compose -f docker-compose.prod.yml ps",
+    "restart:auth": "docker compose -f docker-compose.prod.yml restart auth-service",
+    "restart:user": "docker compose -f docker-compose.prod.yml restart user-service",
+    "restart:device": "docker compose -f docker-compose.prod.yml restart device-service",
+    "restart:frontend": "docker compose -f docker-compose.prod.yml restart frontend"
   },
   "dependencies": {
-    "@nestjs/common": "^11.0.1",
+    "@nestjs/common": "^11.1.6",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/microservices": "^11.1.6",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
-    "@prisma/client": "^6.16.2",
+    "@prisma/client": "^6.17.1",
     "amqplib": "^0.10.9",
     "argon2": "^0.44.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "cookie-parser": "^1.4.7",
     "ioredis": "^5.8.0",
+    "nodemailer": "^7.0.9",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^6.16.2",
@@ -69,7 +84,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@nestjs/cli": "^11.0.0",
+    "@nestjs/cli": "11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@types/amqplib": "^0.10.7",
@@ -87,34 +102,10 @@
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
-    "ts-loader": "^9.5.2",
-    "ts-node": "^10.9.2",
+    "ts-loader": "9.5.2",
+    "ts-node": "10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
+    "typescript": "5.5.4",
     "typescript-eslint": "^8.20.0"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/apps/",
-      "<rootDir>/libs/"
-    ],
-    "moduleNameMapper": {
-      "^y/common(|/.*)$": "<rootDir>/libs/common/src/$1"
-    }
   }
 }

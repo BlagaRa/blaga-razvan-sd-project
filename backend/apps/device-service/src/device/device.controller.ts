@@ -10,7 +10,7 @@ import { AdminGuard } from '../auth/guard/admin.guard';
 @Controller('device')
 export class DeviceController {
     constructor(private deviceService:DeviceService){}
-    @Post()
+    @Post('create')
     createDevice(
         @CurrentUser() user:{userId:number},
         @Body() device:CreateDeviceDto

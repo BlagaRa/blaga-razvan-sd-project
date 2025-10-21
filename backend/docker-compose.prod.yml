@@ -1,0 +1,111 @@
+version: "3.9"
+
+networks:
+  micro_net:
+    driver: bridge
+
+volumes:
+  auth_data:
+  device_data:
+  user_data:
+  caddy_data:
+  caddy_config:
+
+services:
+  # === AUTH SERVICE ===
+  auth-service:
+    build:
+      context: .
+      dockerfile: ./apps/auth-service/Dockerfile
+    env_file:
+      - ./apps/auth-service/.env
+    depends_on:
+      - auth-db
+    networks: [micro_net]
+    # ports:
+    #   - "3001:3001"  # doar dacă vrei acces direct în afara Caddy
+
+  auth-db:
+    image: postgres:13
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: auth
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    networks: [micro_net]
+
+  # === DEVICE SERVICE ===
+  device-service:
+    build:
+      context: .
+      dockerfile: ./apps/device-service/Dockerfile
+    env_file:
+      - ./apps/device-service/.env
+    depends_on:
+      - device-db
+    networks: [micro_net]
+    # ports:
+    #   - "3002:3002"
+
+  device-db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: device
+    volumes:
+      - device_data:/var/lib/postgresql/data
+    networks: [micro_net]
+
+  # === USER SERVICE ===
+  user-service:
+    build:
+      context: .
+      dockerfile: ./apps/user-service/Dockerfile
+    env_file:
+      - ./apps/user-service/.env
+    depends_on:
+      - user-db
+    networks: [micro_net]
+    # ports:
+    #   - "3003:3003"
+
+  user-db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: user
+    volumes:
+      - user_data:/var/lib/postgresql/data
+    networks: [micro_net]
+
+  # === FRONTEND (Next.js) ===
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - auth-service
+      - device-service
+      - user-service
+    networks: [micro_net]
+    # ports:
+    #   - "3000:3000"  # nu e necesar când folosești Caddy
+
+  # === CADDY (reverse proxy) ===
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"      # accesezi aplicația la http://localhost
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    networks: [micro_net]
+    depends_on:
+      - frontend
+      - auth-service
+      - device-service
+      - user-service
