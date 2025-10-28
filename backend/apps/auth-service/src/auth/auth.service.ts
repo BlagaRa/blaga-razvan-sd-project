@@ -192,4 +192,39 @@ export class AuthService {
     await this.updateRefreshTokenHash(user.id, newRefreshToken);
     return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   }
+
+  async forwardVerify(req: any, require?: string) {
+    const hdr = req?.headers || {};
+    const authHeader: string | undefined =
+      hdr["authorization"] || hdr["Authorization"];
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw new UnauthorizedException("Missing Authorization header");
+    }
+    const token = authHeader.slice(7);
+
+    let payload: any;
+    try {
+      payload = this.jwt.verify(token, {
+        secret: this.config.get("JWT_SECRET"),
+      });
+    } catch {
+      throw new UnauthorizedException("Invalid or expired token");
+    }
+
+    // (recomandat) validăm și în DB
+    const user = await this.prisma.authUser.findUnique({
+      where: { id: payload.sub },
+      select: { id: true, role: true, isBanned: true },
+    });
+    if (!user || user.isBanned) {
+      throw new UnauthorizedException("Access denied");
+    }
+
+    // impunem rolul dacă se cere: ?require=role:admin
+    if (require?.includes("role:admin") && user.role !== "ADMIN") {
+      throw new ForbiddenException("Admin only");
+    }
+
+    return true; // OK => 204
+  }
 }

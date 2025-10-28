@@ -1,12 +1,69 @@
 :80 {
-  handle /auth/* {
+  # === AUTH: admin doar pe /auth/admin* ===
+  @auth_admin {
+    path /auth/admin /auth/admin/*
+  }
+  handle @auth_admin {
+    forward_auth auth-service:3001 {
+      uri /auth/forward-verify?require=role:admin
+    }
     reverse_proxy auth-service:3001
   }
-  handle /device/* {
+
+  # restul /auth/* public
+  @auth_public {
+    path /auth/*
+  }
+  handle @auth_public {
+    reverse_proxy auth-service:3001
+  }
+
+  # === DEVICE: admin-only ===
+  @device_admin {
+    path /device/admin /device/admin/*
+  }
+  handle @device_admin {
+    forward_auth auth-service:3001 {
+      uri /auth/forward-verify?require=role:admin
+    }
     reverse_proxy device-service:3002
   }
-  handle /profile/* {
+
+  # === PROFILE: admin-only ===
+  @profile_admin {
+    path /profile/admin /profile/admin/*
+  }
+  handle @profile_admin {
+    forward_auth auth-service:3001 {
+      uri /auth/forward-verify?require=role:admin
+    }
     reverse_proxy user-service:3003
   }
-  reverse_proxy frontend:3000
+
+  # === DEVICE: autentificat ===
+  @device_auth {
+    path /device/*
+  }
+  handle @device_auth {
+    forward_auth auth-service:3001 {
+      uri /auth/forward-verify
+    }
+    reverse_proxy device-service:3002
+  }
+
+  # === PROFILE: autentificat ===
+  @profile_auth {
+    path /profile/*
+  }
+  handle @profile_auth {
+    forward_auth auth-service:3001 {
+      uri /auth/forward-verify
+    }
+    reverse_proxy user-service:3003
+  }
+
+  # === frontend fallback ===
+  handle {
+    reverse_proxy frontend:3000
+  }
 }

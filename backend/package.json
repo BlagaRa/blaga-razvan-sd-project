@@ -57,7 +57,8 @@
     "restart:auth": "docker compose -f docker-compose.prod.yml restart auth-service",
     "restart:user": "docker compose -f docker-compose.prod.yml restart user-service",
     "restart:device": "docker compose -f docker-compose.prod.yml restart device-service",
-    "restart:frontend": "docker compose -f docker-compose.prod.yml restart frontend"
+    "restart:frontend": "docker compose -f docker-compose.prod.yml restart frontend",
+    "restart:caddy": "docker compose -f docker-compose.prod.yml restart caddy"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",

@@ -161,8 +161,7 @@ export const useUserStore = create<AuthState>((set, get) => ({
   /** ========== LOGOUT ========== */
   logout: async() => {
     set({loading:true})
-    const res=await api.post(`${AUTH_URL}/logout`);
-    const message=res.data;
+    await api.post(`${AUTH_URL}/logout`);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     set({
@@ -177,7 +176,7 @@ export const useUserStore = create<AuthState>((set, get) => ({
       loading:false,
       auths: [],
     });
-    toast({ title: message });
+    toast({title:"Logout successfully"})
   },
 
   /** ========== LOAD FROM STORAGE ========== */

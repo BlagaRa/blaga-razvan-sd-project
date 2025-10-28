@@ -9,6 +9,8 @@ import {
   Post,
   Put,
   Query,
+  Req,
+  Res,
   UseGuards,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
@@ -18,6 +20,16 @@ import { AdminGuard } from "./auth/guard";
 @Controller("auth")
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @Get("forward-verify")
+  @HttpCode(HttpStatus.NO_CONTENT) // 204
+  async forwardVerify(
+    @Req() req: any,
+    @Query("require") require?: string // ex: "role:admin"
+  ) {
+    await this.authService.forwardVerify(req, require); // aruncă 401/403 dacă nu e OK
+    return; // 204 No Content
+  }
 
   /** ======== AUTH FLOW ======== */
   @Post("signup")
